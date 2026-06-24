@@ -15,18 +15,6 @@ No SDK. No API keys. No vendor lock-in. The Council shells out to whatever LLM C
 
 [Install](#install) · [How it works](#how-it-works) · [Quickstart](#quickstart) · [Customize](#customize) · [AGENTS.md](AGENTS.md) · [CHANGELOG](CHANGELOG.md)
 
-> **v0.1.0** ships architecture + design only. Empirical evaluation (benchmark + arXiv paper) lands in v0.2 — see [Roadmap](#roadmap).
-
-## Where the evidence stands
-
-v0.1 is an architecture and a methodology, not a proven result. Be skeptical — the tool would tell you to be.
-
-The one thing measured so far cuts against the hype: on an early guardrail-enforcement benchmark, the five-role council did **not** beat a single strong judge, and it ran several times slower. Small sample, preliminary — full methodology and numbers land with the v0.2 evaluation. I'm shipping the null result instead of burying it.
-
-What I have **not** measured, and where I think the real value is: the quality of the revision brief, not the count of violations caught. That's the hypothesis v0.2 tests — not a claim.
-
-So treat it as a structured second opinion that surfaces dissent for you to weigh, not an oracle. The verdict varies run to run; the audit trail doesn't. The council pattern itself is prior art (ChatEval, multi-agent debate, Mixture-of-Agents) — the contribution is the gate for non-code, irreversible text with the dissent kept visible, not the mechanism.
-
 ---
 
 ## Install
@@ -229,7 +217,7 @@ The Council is designed for **tier-1 artifacts** — the ones where review cost 
 - **Tier 2** (skips Council): internal drafts, dashboards, infrastructure, dispatch updates.
 - **Tier 3** (1-in-5 sample): daily briefings, internal analyses, planning artifacts.
 
-Tier classification is rule-based in v0.1 — glob patterns in `council.yaml#tier_rules`. Model-based and hybrid classifiers are on the v0.3 roadmap.
+Tier classification is rule-based — glob patterns in `council.yaml#tier_rules`.
 
 ---
 
@@ -334,20 +322,10 @@ Mix runtimes within a single Council run — e.g., one deliberator on `lmstudio`
 
 ---
 
-## Roadmap
-
-- **v0.1.0** *(this release)* — Architecture + design + 5 prompts + 4 runtimes. License: MIT.
-- **v0.1.1** — MCP server wrapper (Claude Desktop, Cursor, Cline). GitHub Actions CI badge.
-- **v0.2.0** — Empirical evaluation. AgentOS-Bench-style 3-arm benchmark. Recursive Council-on-Council validation study. Paper released to arXiv.
-- **v0.3.0** — Adjudicator improvements + verdict-policy refinements based on 0.2 findings. Model-based and hybrid tier classifiers. Additional runtime adapters.
-- **v1.0.0** — Stable verdict JSON schema, exit codes, and CLI surface. Breaking changes will bump the minor version until then.
-
----
-
 ## Honest limitations
 
 - **Soft file-path coupling.** Voice & Identity and Strategy & Stakes read external context files. What they contain is the operator's responsibility.
-- **Same-model self-style risk.** When all deliberators run on the same underlying model, they share that model's style preferences and may converge on its blind spots. Mitigation: run one deliberator on a different model family. Cross-model evaluation is a v0.2 work item.
+- **Same-model self-style risk.** When all deliberators run on the same underlying model, they share that model's style preferences and may converge on its blind spots. Mitigation: run one deliberator on a different model family.
 - **Behavioral coupling on producing agents.** If a producing agent learns "the Council will catch X," it may loosen on X. Structural and unfixable inside the package; mitigation is operator discipline (periodic audits with Council OFF vs. ON).
 - **Adjudicator non-determinism.** Same artifact can produce slightly different verdicts across runs. Documented; treated as honest LLM-as-judge variance.
 
@@ -375,5 +353,3 @@ MIT. See [LICENSE](LICENSE).
 Agent Council: A runtime-portable adjudicator council for tier-1 artifact gating.
 v0.1.0, 2026. https://github.com/Avyayalaya/agent-council
 ```
-
-A formal paper accompanies v0.2.0.
