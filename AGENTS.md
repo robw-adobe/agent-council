@@ -70,7 +70,7 @@ Seven tests cover:
 4. `test_archive_written` — 10 transcript files + artifact snapshot land under `council_archive/<span_id>/`.
 5. `test_elapsed_time_under_five_minutes` — mock-runtime SLA.
 6. `test_no_emitting_agent_prompt_references_council` — modularity invariant; greps any host operator system's `agents/*/prompt.md` (if present) and asserts zero Council references. Skipped when run outside a host system.
-7. `test_council_package_has_no_agent_prime_imports` — walks `src/agent_council/` AST and asserts no imports outside stdlib + the package + declared optional deps.
+7. `test_council_package_has_no_external_imports` — walks `src/agent_council/` AST and asserts no imports outside stdlib + the package + declared optional deps.
 
 **Empirical claim (P3):** `Composite_with_Council > Composite_without_Council` on AgentOS-Bench v1 (Categories 1, 2, 3, 7), predicted delta ≥ +10 points. P3 spec is in `plan/stage3_architecture.md`; harness lives at `bench/` (not yet built — P1 deliverable).
 

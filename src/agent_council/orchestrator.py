@@ -635,9 +635,9 @@ class Council:
         Resolution order (returns the FIRST existing match):
             1. Absolute path (after ``~`` expansion).
             2. Path relative to current working directory.
-            3. Path relative to ``$AGENT_PRIME_ROOT`` env var (if set).
+            3. Path relative to ``$COUNCIL_WORKSPACE_ROOT`` env var (if set).
                The env var name is back-compat with the original host system
-               (Agent Prime). Set it to any directory you want context_refs
+               (the operator workspace). Set it to any directory you want context_refs
                resolved against.
             4. Path relative to a heuristic host-system root — walks up from
                ``self.config_dir`` looking for a parent that contains both
@@ -652,7 +652,7 @@ class Council:
         Returns:
             (resolved_path, resolution_source) where resolution_source is a
             short label for the transparent logging path (``absolute``,
-            ``cwd``, ``env``, ``agent_prime_root``, ``package_data``,
+            ``cwd``, ``env``, ``workspace_root``, ``package_data``,
             ``config_dir``, or ``missing``).
         """
         raw = Path(ref).expanduser()
@@ -666,20 +666,20 @@ class Council:
         if cwd_candidate.exists():
             return cwd_candidate, "cwd"
 
-        # 3. AGENT_PRIME_ROOT env override (name retained for back-compat with
+        # 3. COUNCIL_WORKSPACE_ROOT env override (name retained for back-compat with
         # the original host system; treat as a generic "host root" override).
-        env_root = os.environ.get("AGENT_PRIME_ROOT")
+        env_root = os.environ.get("COUNCIL_WORKSPACE_ROOT")
         if env_root:
             env_candidate = (Path(env_root).expanduser() / raw).resolve()
             if env_candidate.exists():
                 return env_candidate, "env"
 
         # 4. Heuristic host-system root.
-        ap_root = _find_agent_prime_root(self.config_dir)
+        ap_root = _find_workspace_root(self.config_dir)
         if ap_root is not None:
             ap_candidate = (ap_root / raw).resolve()
             if ap_candidate.exists():
-                return ap_candidate, "agent_prime_root"
+                return ap_candidate, "workspace_root"
 
         # 5. Package data dir (./data/ adjacent to agent_council package).
         pkg_data = Path(__file__).resolve().parent / "data"
@@ -692,7 +692,7 @@ class Council:
         if cfg_candidate.exists():
             return cfg_candidate, "config_dir"
 
-        # Nothing matched — return the env/agent-prime-root candidate (best
+        # Nothing matched — return the env/workspace-root candidate (best
         # diagnostic shape) and mark missing.
         diag = None
         if env_root:
@@ -715,7 +715,7 @@ class Council:
         council.yaml as relative paths (or absolute paths that fail to resolve
         on a different machine — e.g., OneDrive vs non-OneDrive home dirs on
         Windows) get fixed up against the host-system root or the
-        ``AGENT_PRIME_ROOT`` env override. The resolution source is echoed
+        ``COUNCIL_WORKSPACE_ROOT`` env override. The resolution source is echoed
         to stderr for transparency.
         """
         out: list[str] = []
@@ -807,14 +807,14 @@ def merge_verdicts(
 
 
 # Cache for the host-system root walk (idempotent per process).
-_AGENT_PRIME_ROOT_CACHE: dict[str, Path | None] = {}
+_COUNCIL_WORKSPACE_ROOT_CACHE: dict[str, Path | None] = {}
 
 
-def _find_agent_prime_root(start: Path) -> Path | None:
+def _find_workspace_root(start: Path) -> Path | None:
     """Walk up from ``start`` looking for the host operator system root.
 
     The function name is retained for back-compat with the original host
-    system (Agent Prime); semantically it locates any operator-workspace
+    system (the operator workspace); semantically it locates any operator-workspace
     root that contains the expected sentinel files.
 
     Heuristic: a directory containing BOTH ``shared/`` and ``projects/`` and
@@ -827,8 +827,8 @@ def _find_agent_prime_root(start: Path) -> Path | None:
     """
     start = Path(start).resolve()
     key = str(start)
-    if key in _AGENT_PRIME_ROOT_CACHE:
-        return _AGENT_PRIME_ROOT_CACHE[key]
+    if key in _COUNCIL_WORKSPACE_ROOT_CACHE:
+        return _COUNCIL_WORKSPACE_ROOT_CACHE[key]
 
     current = start if start.is_dir() else start.parent
     # Walk up at most 10 levels — anything deeper is a misuse.
@@ -837,13 +837,13 @@ def _find_agent_prime_root(start: Path) -> Path | None:
         has_projects = (current / "projects").is_dir()
         has_marker = (current / "CLAUDE.md").is_file() or (current / "prime").is_dir()
         if has_shared and has_projects and has_marker:
-            _AGENT_PRIME_ROOT_CACHE[key] = current
+            _COUNCIL_WORKSPACE_ROOT_CACHE[key] = current
             return current
         if current.parent == current:
             break
         current = current.parent
 
-    _AGENT_PRIME_ROOT_CACHE[key] = None
+    _COUNCIL_WORKSPACE_ROOT_CACHE[key] = None
     return None
 
 

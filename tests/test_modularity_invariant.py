@@ -32,9 +32,9 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
-# Agent Prime root is two levels above projects/SYS-024_agent_council/.
-AGENT_PRIME_ROOT = PROJECT_ROOT.parent.parent
-AGENTS_DIR = AGENT_PRIME_ROOT / "agents"
+# Host workspace root, when this package is wired into one (two levels up).
+HOST_ROOT = PROJECT_ROOT.parent.parent
+AGENTS_DIR = HOST_ROOT / "agents"
 
 # Council references — case-insensitive, word-boundaries to avoid false positives
 # on "councilman" style false matches.
@@ -44,20 +44,13 @@ COUNCIL_REGEX = re.compile(
     re.IGNORECASE,
 )
 
-# Agents that are INTENTIONALLY allowed to reference Council. Per the design
-# (docs/superpowers/specs/2026-05-11-agent-council-design.md §2.2):
-#
-#   "The ONLY agent prompt that mentions Council is Emissary's (it's the
-#    chokepoint, not an artifact producer)."
-#
-# Emissary is the boundary between Agent Prime and the world (Rule 41). Its
-# Layer 3 action queue routes every Tier-2 external action through Council
-# before execution. Because Emissary does not produce artifacts — it only
-# routes them — it remains "modular" in the sense that matters: emitting
-# agents (Writer, Synthesizer, Builder, Patent Analyst, Industry/Investment
-# Analyst) have zero Council references and can be lifted to any other
-# context. The Emissary exemption is intentional and documented; if a NEW
-# agent is added to this set, it must be justified in the design spec.
+# Host-system agents that are INTENTIONALLY allowed to reference the Council.
+# The modularity invariant: *emitting* agents (the ones that produce artifacts)
+# never reference the Council, so the Council can be added or removed without
+# touching them. A single "chokepoint" agent that only routes artifacts to the
+# Council (rather than producing them) may be exempt. Add to this set only with
+# justification. This scan only runs when the package is wired into a host
+# system; in a standalone checkout it is skipped.
 EXEMPTED_AGENTS = {"emissary"}
 
 
@@ -94,7 +87,7 @@ class ModularityInvariantTest(unittest.TestCase):
             text = p.read_text(encoding="utf-8", errors="replace")
             for lineno, line in enumerate(text.splitlines(), start=1):
                 if COUNCIL_REGEX.search(line):
-                    violations.append((str(p.relative_to(AGENT_PRIME_ROOT)), lineno, line.strip()[:140]))
+                    violations.append((str(p.relative_to(HOST_ROOT)), lineno, line.strip()[:140]))
 
         # Useful trace when the invariant is investigated — shows which agents
         # were scanned and which were exempted.
@@ -107,7 +100,7 @@ class ModularityInvariantTest(unittest.TestCase):
             )
             self.fail(msg)
 
-    def test_council_package_has_no_agent_prime_imports(self) -> None:
+    def test_council_package_has_no_external_imports(self) -> None:
         """Walk src/agent_council/ — no imports outside stdlib + declared deps."""
         package_root = PROJECT_ROOT / "src" / "agent_council"
         self.assertTrue(package_root.exists(), f"Package not found at {package_root}")
