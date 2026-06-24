@@ -123,7 +123,22 @@ class VerdictPolicy:
         results: dict[str, DeliberatorResult],
         min_deliberators: int = 3,
     ) -> tuple[str, str]:
-        """Compute (verdict, reasoning) from the deliberators' R2 flags.
+        """Compute (verdict, reasoning) from R2 flags AND calibration scores.
+
+        Moderate, score-aware policy — the 1-5 calibration score is
+        load-bearing, not decorative. Configurable via
+        ``council.yaml#adjudicator.verdict_policy``:
+
+          - ``ship_min_score`` (default 3): SHIP requires 0 hard blocks AND
+            every *present* R2 score >= this.
+          - ``soft_block_score`` (default 1): an R2 score <= this is a SOFT
+            BLOCK — it counts toward HOLD even without ``would_block``.
+          - ``hold_block_count`` (default 3): HOLD when hard+soft blocks reach
+            this count, or on any ``irreducible`` flag.
+
+        A score of 2 (above ``soft_block_score`` but below ``ship_min_score``)
+        blocks SHIP -> REVISE but is not a soft block. Missing scores fall back
+        to binary block logic, so absent calibration never forces HOLD/REVISE.
 
         Args:
             results: mapping of role-id to DeliberatorResult.
@@ -134,6 +149,10 @@ class VerdictPolicy:
             (verdict, reasoning) tuple. Verdict is one of
             SHIP | REVISE | HOLD | INCOMPLETE.
         """
+        ship_min_score = int(self.config.get("ship_min_score", 3))
+        soft_block_score = int(self.config.get("soft_block_score", 1))
+        hold_block_count = int(self.config.get("hold_block_count", 3))
+
         succeeded = [r for r in results.values() if r.succeeded]
         if len(succeeded) < min_deliberators:
             return (
@@ -146,14 +165,22 @@ class VerdictPolicy:
             )
 
         # R2 takes precedence; fall back to R1 if a deliberator failed at R2.
-        blocking = []
-        irreducible = []
+        hard_block: list[str] = []
+        soft_block: list[str] = []
+        irreducible: list[str] = []
+        weak: list[int] = []  # present scores below the ship bar
         for r in succeeded:
-            would_block = r.r2_would_block if r.raw_r2 is not None else r.r1_would_block
+            r2 = r.raw_r2 is not None
+            would_block = r.r2_would_block if r2 else r.r1_would_block
+            score = r.r2_score if r2 else r.r1_score
             if would_block:
-                blocking.append(r.role)
+                hard_block.append(r.role)
+            elif score is not None and score <= soft_block_score:
+                soft_block.append(r.role)
             if r.r2_irreducible:
                 irreducible.append(r.role)
+            if score is not None and score < ship_min_score:
+                weak.append(score)
 
         if irreducible:
             return (
@@ -164,21 +191,37 @@ class VerdictPolicy:
                 ),
             )
 
-        n_block = len(blocking)
-        if n_block == 0:
-            return "SHIP", "No deliberator blocked after Round 2."
-        if n_block >= 3:
+        effective = hard_block + soft_block
+        if len(effective) >= hold_block_count:
+            detail = ", ".join(
+                hard_block + [f"{r} (score<={soft_block_score})" for r in soft_block]
+            )
             return (
                 "HOLD",
                 (
-                    f"{n_block} deliberators blocked: {', '.join(blocking)}. "
-                    "Three or more blocks indicates structural issues — recommend HOLD."
+                    f"{len(effective)} blocking signals: {detail}. "
+                    f"{hold_block_count} or more indicates structural issues — recommend HOLD."
                 ),
+            )
+
+        if not hard_block and not soft_block and not weak:
+            return (
+                "SHIP",
+                "No deliberator blocked after Round 2 and all scores cleared the bar.",
+            )
+
+        reasons: list[str] = []
+        if hard_block:
+            reasons.append(f"{len(hard_block)} hard block(s): {', '.join(hard_block)}")
+        if soft_block:
+            reasons.append(
+                f"{len(soft_block)} soft block(s) (score<={soft_block_score})"
+            )
+        if weak:
+            reasons.append(
+                f"score(s) {sorted(weak)} below the ship bar ({ship_min_score})"
             )
         return (
             "REVISE",
-            (
-                f"{n_block} deliberator(s) blocked: {', '.join(blocking)}. "
-                "No irreducible dissent — fixable with a revision pass."
-            ),
+            "; ".join(reasons) + ". No irreducible dissent — fixable with a revision pass.",
         )

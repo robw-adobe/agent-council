@@ -146,7 +146,7 @@ python -m agent_council validate-config <path>
   "adjudicator_reasoning": "...",
   "revision_brief": "...",
   "runtime": "claude_cli",
-  "model": "claude-opus-4-7",
+  "model": "sonnet",
   "elapsed_seconds": 187.4,
   "persisted": true
 }

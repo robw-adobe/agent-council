@@ -20,7 +20,10 @@ version: "1.0"
 runtime:
   type: claude_cli            # claude_cli | mock_cli | lmstudio | ollama | gh_models
   binary: claude              # PATH-resolvable binary name
-  model: claude-opus-4-7      # model name passed through to the CLI
+  model: sonnet               # undated alias the claude CLI always resolves (works on
+                              # a fresh install regardless of tier). Pin a specific or
+                              # higher-tier model for best gate quality, e.g. `opus`
+                              # or a dated id like `claude-opus-4-8`, if available to you.
   flags: ["--print"]          # adapter-specific flags
   invocation_pattern: stdin   # stdin | args | file
   timeout_seconds: 600        # per-deliberator-call timeout. Large artifacts
@@ -97,11 +100,16 @@ deliberators:
 adjudicator:
   prompt: ./prompts/adjudicator.md
   verdict_policy:
-    # These are documentation; the policy logic is enforced in code.
-    # See src/agent_council/verdict.py:VerdictPolicy.apply.
-    ship: "0 deliberators set would_block:true after R2"
-    revise: "1-2 would_block AND no 'irreducible' flag"
-    hold: "3+ would_block OR any 'irreducible' flag"
+    # Score-aware policy — the 1-5 calibration score is load-bearing, not
+    # decorative. Logic in src/agent_council/verdict.py:VerdictPolicy.apply.
+    # Tune these to set how strict the gate is:
+    ship_min_score: 3      # SHIP requires 0 hard blocks AND every R2 score >= this
+    soft_block_score: 1    # an R2 score <= this is a SOFT BLOCK (counts toward HOLD)
+    hold_block_count: 3    # HOLD when (hard + soft) blocks reach this, or any 'irreducible'
+    # Resulting behaviour at the defaults above:
+    #   ship:   0 hard blocks AND all R2 scores >= 3
+    #   revise: a score of 2, OR 1-2 (hard|soft) blocks, with no irreducible
+    #   hold:   3+ (hard|soft) blocks, OR any 'irreducible' flag
 
 # ---------------------------------------------------------------------------
 # Protocol — round mechanics.
