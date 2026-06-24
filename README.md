@@ -5,7 +5,7 @@
 [![python ≥3.11](https://img.shields.io/badge/python-≥3.11-blue.svg)](pyproject.toml)
 [![version](https://img.shields.io/badge/version-0.1.0-green.svg)](CHANGELOG.md)
 
-> *"Looks good" is not a quality gate. This is.*
+> *Five reviewers pull your draft apart, keep their disagreement visible, and hand you one verdict — for the text you can't un-ship.*
 
 A runtime-portable 5-agent council that adjudicates text artifacts before they ship. Five role-conditioned LLM deliberators run in a 2-round async protocol with cross-read rebuttal. One verdict — `SHIP`, `REVISE`, or `HOLD` — plus a structured revision brief and a full audit transcript.
 
@@ -16,6 +16,16 @@ No SDK. No API keys. No vendor lock-in. The Council shells out to whatever LLM C
 [Install](#install) · [How it works](#how-it-works) · [Quickstart](#quickstart) · [Customize](#customize) · [AGENTS.md](AGENTS.md) · [CHANGELOG](CHANGELOG.md)
 
 > **v0.1.0** ships architecture + design only. Empirical evaluation (benchmark + arXiv paper) lands in v0.2 — see [Roadmap](#roadmap).
+
+## Where the evidence stands
+
+v0.1 is an architecture and a methodology, not a proven result. Be skeptical — the tool would tell you to be.
+
+The one thing measured so far cuts against the hype: on an early guardrail-enforcement benchmark, the five-role council did **not** beat a single strong judge, and it ran several times slower. Small sample, preliminary — full methodology and numbers land with the v0.2 evaluation. I'm shipping the null result instead of burying it.
+
+What I have **not** measured, and where I think the real value is: the quality of the revision brief, not the count of violations caught. That's the hypothesis v0.2 tests — not a claim.
+
+So treat it as a structured second opinion that surfaces dissent for you to weigh, not an oracle. The verdict varies run to run; the audit trail doesn't. The council pattern itself is prior art (ChatEval, multi-agent debate, Mixture-of-Agents) — the contribution is the gate for non-code, irreversible text with the dissent kept visible, not the mechanism.
 
 ---
 
