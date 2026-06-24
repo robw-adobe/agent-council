@@ -37,6 +37,7 @@ from agent_council.verdict import (
     DeliberatorResult,
     Verdict,
     VerdictPolicy,
+    summarize_round2_changes,
 )
 
 ROUND_2_MARKER = "[ROUND_2_REBUTTAL]"
@@ -235,6 +236,10 @@ class Council:
                 dr.r2_score = _coerce_int(payload.get("score"))
                 dr.r2_would_block = bool(payload.get("would_block"))
                 dr.r2_irreducible = bool(payload.get("irreducible"))
+                conc = payload.get("concessions")
+                esc = payload.get("escalations")
+                dr.r2_concessions = [str(x) for x in conc] if isinstance(conc, list) else []
+                dr.r2_escalations = [str(x) for x in esc] if isinstance(esc, list) else []
             # If schema failed, raw_r1 is the parsed (but invalid) payload — leave
             # it so the archive captures what was attempted, but the verdict
             # policy sees no_dissent because r1_would_block defaults to False.
@@ -264,6 +269,11 @@ class Council:
             )
         revision_brief = (adj_payload or {}).get("revision_brief")
         dissent_summary = (adj_payload or {}).get("dissent_summary") or ""
+        # Surface the deliberators' own R2 deltas from ground truth, not just
+        # the Adjudicator's retelling (audit: cross-read was never consumed).
+        r2_deltas = summarize_round2_changes(results)
+        if r2_deltas:
+            dissent_summary = f"{dissent_summary}\n\n{r2_deltas}".strip()
 
         verdict = Verdict(
             verdict=final_verdict,

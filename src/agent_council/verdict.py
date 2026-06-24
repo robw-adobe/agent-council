@@ -41,6 +41,8 @@ class DeliberatorResult:
     r2_would_block: bool = False
     r2_irreducible: bool = False
     top_issues: list[str] = field(default_factory=list)
+    r2_concessions: list[str] = field(default_factory=list)
+    r2_escalations: list[str] = field(default_factory=list)
     raw_r1: dict[str, Any] | None = None
     raw_r2: dict[str, Any] | None = None
     error: str | None = None  # populated if this deliberator failed
@@ -83,6 +85,8 @@ class Verdict:
                     "r2_score": v.r2_score,
                     "r2_would_block": v.r2_would_block,
                     "r2_irreducible": v.r2_irreducible,
+                    "r2_concessions": v.r2_concessions,
+                    "r2_escalations": v.r2_escalations,
                     "top_issues": v.top_issues,
                     "succeeded": v.succeeded,
                     "error": v.error,
@@ -105,6 +109,24 @@ class Verdict:
             "HOLD": EXIT_HOLD,
             "INCOMPLETE": EXIT_INCOMPLETE,
         }.get(self.verdict, EXIT_INCOMPLETE)
+
+
+def summarize_round2_changes(results: dict[str, DeliberatorResult]) -> str:
+    """Deterministic summary of R2 concessions/escalations, in the deliberators'
+    own words. Returns "" when nothing moved in Round 2.
+
+    This consumes the cross-read deltas directly rather than trusting the
+    Adjudicator to retell them, so the dissent surface reflects ground truth.
+    """
+    lines: list[str] = []
+    for role, r in results.items():
+        for c in r.r2_concessions:
+            lines.append(f"- {role} conceded: {c}")
+        for e in r.r2_escalations:
+            lines.append(f"- {role} escalated: {e}")
+    if not lines:
+        return ""
+    return "Round 2 cross-read deltas:\n" + "\n".join(lines)
 
 
 class VerdictPolicy:
