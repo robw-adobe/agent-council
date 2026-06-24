@@ -42,4 +42,4 @@ A `SHIP` verdict with concerns means:
 
 ## Why this artifact
 
-LinkedIn posts about Parth-built frameworks are a canonical Council use case — they're external-facing (tier 1), they're identity-shaping (positioning), and they typically have specific failure modes (voice violations, underspecified claims, thin evidence layers). The seeded issues here are representative of issues caught in real W5 sweeps on similar artifacts.
+LinkedIn posts about an operator's own frameworks are a canonical Council use case — they're external-facing (tier 1), they're identity-shaping (positioning), and they typically have specific failure modes (voice violations, underspecified claims, thin evidence layers). The seeded issues here are representative of issues caught in real review sweeps on similar artifacts.

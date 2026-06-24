@@ -131,7 +131,7 @@ Generic "there is opportunity cost" is useless. **Name the queued work the artif
 ### Step 4: Run the kill-criteria check
 
 Does any committed kill-criterion fire? Kill criteria live in:
-- `registry.json` under each project entry's `kill_condition` field (Agent Prime convention)
+- a project registry under each entry's `kill_condition` field (a common operator-workspace convention)
 - Strategy doc kill criteria sections
 - OKR red-lines
 

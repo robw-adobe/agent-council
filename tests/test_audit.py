@@ -11,7 +11,7 @@ Builds a synthetic council_log.jsonl with 30 entries spanning 4 weeks across
   - malformed JSON lines are skipped and counted
   - drift detection flags a deliberately monotonic trend in the fixture
   - --out writes to a file instead of stdout
-  - override count tracks parth_override entries
+  - override count tracks operator_override entries
 
 The fixture is built deterministically so the assertions stay stable across
 runs and across operating systems.
@@ -93,7 +93,7 @@ def _build_record(
         "persisted": True,
     }
     if override:
-        rec["parth_override"] = True
+        rec["operator_override"] = True
     if tokens is not None:
         rec["tokens"] = {"total": tokens}
     return rec
@@ -132,7 +132,7 @@ def _build_fixture_30(log_path: Path, now: datetime) -> None:
             _build_record(ts, verdict, "substack_post", tokens=2400)
         ))
 
-    # 3 learnings records (one with parth_override=True).
+    # 3 learnings records (one with operator_override=True).
     for i, (verdict, override) in enumerate([
         ("SHIP", False), ("REVISE", True), ("SHIP", False),
     ]):
@@ -263,7 +263,7 @@ class AuditMarkdownTest(unittest.TestCase):
         self.assertIn("tightening", section)
 
     def test_markdown_override_count_matches_fixture(self) -> None:
-        """Fixture has exactly 1 parth_override:true record."""
+        """Fixture has exactly 1 operator_override:true record."""
         code, md = self._run()
         self.assertEqual(0, code)
         # Override section reports "**1** of 30".

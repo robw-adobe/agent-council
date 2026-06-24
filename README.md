@@ -103,11 +103,12 @@ The Skills are the **interactive** single-perspective surface. The CLI / MCP is 
 | Round 2 cross-read rebuttal (each deliberator sees the other 3 R1 critiques) | no | yes |
 | Adjudicator prior-verdict compounding loop on `artifact_type` | no | yes |
 | JSONL audit log, replayable | no | yes |
-| Reproducible verdict across runs | no | yes |
+| Single adjudicated verdict (not 5 separate critiques) | no | yes |
+| Structured, persisted verdict record per run | no | yes |
 | Cost per review | 1 LLM call per Skill | ~9 LLM calls (4 deliberators × 2 rounds + Adjudicator) |
-| Sweet spot | Ad-hoc 1 or 2 perspectives on a doc you are editing | Pre-ship gating in pipelines; reproducible audit trail |
+| Sweet spot | Ad-hoc 1 or 2 perspectives on a doc you are editing | Pre-ship gating in pipelines; structured, persisted audit trail |
 
-Composing 5 Skills sequentially produces 5 independent critiques. That is useful for ad-hoc multi-angle review, but it is not the same artifact as the automated Council. If you need parallel execution, cross-read rebuttal, or a reproducible JSONL verdict, use the CLI / MCP path.
+Composing 5 Skills sequentially produces 5 independent critiques. That is useful for ad-hoc multi-angle review, but it is not the same artifact as the automated Council. If you need parallel execution, cross-read rebuttal, or a structured, persisted JSONL verdict record, use the CLI / MCP path.
 
 ### Any other LLM (ChatGPT, Gemini, manual)
 

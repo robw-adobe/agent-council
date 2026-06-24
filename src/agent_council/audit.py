@@ -14,7 +14,7 @@ Reads the verdict log line-by-line (streaming, no full-file load), filters by
   4. **Drift detection** — rolling 4-week verdict means per artifact_type,
      flagged if monotonic over 3+ weeks (Voice tightening OR Council
      instability — operator interprets).
-  5. **Override rate** — count of ``parth_override: true`` entries (F8
+  5. **Override rate** — count of ``operator_override: true`` entries (F8
      signal from design v0.2 §9).
 
 CLI flags:
@@ -485,11 +485,11 @@ def _verdict_score(verdict: str) -> float | None:
 
 
 def _override_rate(records: list[dict[str, Any]]) -> dict[str, Any]:
-    """Count ``parth_override: true`` entries (failure-mode F8 signal)."""
+    """Count ``operator_override: true`` entries (failure-mode F8 signal)."""
     overrides = 0
     overrides_by_type: dict[str, int] = defaultdict(int)
     for rec in records:
-        if rec.get("parth_override") is True:
+        if rec.get("operator_override") is True:
             overrides += 1
             atype = rec.get("artifact_type") or "unknown_type"
             overrides_by_type[atype] += 1
@@ -719,7 +719,7 @@ def _render_override_section(ov: dict[str, Any]) -> str:
     lines.append("## 5. Override Rate (F8 signal)")
     lines.append("")
     lines.append(
-        f"- `parth_override: true` entries: **{ov['count']}** "
+        f"- `operator_override: true` entries: **{ov['count']}** "
         f"of {ov['total_records']} records "
         f"({ov['rate']:.1%})"
     )

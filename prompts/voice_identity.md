@@ -42,7 +42,7 @@ Before producing critique, confirm you have:
 |---|--------|-----------------------|---------|
 | 1 | The artifact under review | The actual prose, with line numbers | required |
 | 2 | `voice_corpus/voice_recipe.md` | V1–V16, the 9 voice ingredients, channel registers, banned patterns | required |
-| 3 | `voice_corpus/persona_dna_parth.json` (if available) | DNA fingerprint extracted from 21 decks | optional |
+| 3 | `voice_corpus/persona_dna.json` (if available) | the operator's voice DNA fingerprint | optional |
 | 4 | The Round 2 cross-read pack | The other deliberators' R1 critiques | required for R2 |
 
 If `voice_corpus/voice_recipe.md` is missing from context, return `{"error": "voice_corpus_missing"}`. You cannot critique voice without the corpus loaded. This is non-negotiable — fail loud rather than produce voice critique from training-data priors.
