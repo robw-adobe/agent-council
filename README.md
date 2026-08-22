@@ -38,6 +38,8 @@ cp council.yaml.example council.yaml  # then edit
 python -m agent_council review path/to/artifact.md --tier=1
 ```
 
+**GitHub Copilot users:** for a one-file setup, copy the ready-to-go Copilot config instead — `cp council.copilot.yaml.example council.yaml`. It has the `copilot_cli` runtime and the validated flags already active, so you only need the `copilot` CLI installed + authenticated.
+
 Requires Python ≥3.11 and at least one supported LLM CLI on PATH.
 
 ### MCP server (Claude Desktop, Cursor, Cline, custom agents)
