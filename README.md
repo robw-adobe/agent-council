@@ -9,7 +9,7 @@
 
 A runtime-portable 5-agent council that adjudicates text artifacts before they ship. Five role-conditioned LLM deliberators run in a 2-round async protocol with cross-read rebuttal. One verdict — `SHIP`, `REVISE`, or `HOLD` — plus a structured revision brief and a full audit transcript.
 
-No SDK. No API keys. No vendor lock-in. The Council shells out to whatever LLM CLI is configured (`claude`, `lmstudio`, `ollama`, mock). Modularity invariant is CI-tested — the council can be removed and producing agents keep working unchanged.
+No SDK. No API keys. No vendor lock-in. The Council shells out to whatever LLM CLI is configured (`claude`, `copilot`, `lmstudio`, `ollama`, mock). Modularity invariant is CI-tested — the council can be removed and producing agents keep working unchanged.
 
 *Personal research, separate from my day-job at Microsoft. MIT-licensed.*
 
@@ -313,6 +313,7 @@ python -m agent_council audit --since=7d --verdict=HOLD
 | Runtime | Recommended for | Notes |
 |---|---|---|
 | `claude_cli` | Production tier-1 gating | Requires Anthropic Claude CLI installed + authenticated. Default. |
+| `copilot_cli` | Production gating via GitHub Copilot | Requires the `copilot` CLI installed + authenticated. Non-interactive (`-p`); use `-s --no-custom-instructions --allow-all-tools` in `flags`. |
 | `lmstudio` | Local sub-sample testing | HTTP 500 on large parallel prompts at default concurrency — tune `max_concurrent` and `context_length`. |
 | `ollama` | Offline / local-first | Lower-end models may not satisfy the deliberator schema; fall back to `claude_cli` for production. |
 | `mock_cli` | CI / smoke tests | Canned responses for testing the orchestrator without burning tokens. |
