@@ -40,6 +40,8 @@ python -m agent_council review path/to/artifact.md --tier=1
 
 **GitHub Copilot users:** for a one-file setup, copy the ready-to-go Copilot config instead — `cp council.copilot.yaml.example council.yaml`. It has the `copilot_cli` runtime and the validated flags already active, so you only need the `copilot` CLI installed + authenticated.
 
+**Reviewing code instead of prose?** Copy the software-council preset — `cp council.software.yaml.example council.yaml`. It runs on the `copilot_cli` runtime and repurposes two deliberators for engineering review: `voice_identity` → **Code Quality & Conventions** (`prompts/code_quality.md`) and `strategy` → **Architecture & Scope** (`prompts/architecture.md`), backed by editable Python/Flask/pytest corpora in `examples/code_standards.example.md` and `examples/engineering_goals.example.md`. Slot ids are kept for schema compatibility, so no source/test changes are needed.
+
 Requires Python ≥3.11 and at least one supported LLM CLI on PATH.
 
 ### MCP server (Claude Desktop, Cursor, Cline, custom agents)
