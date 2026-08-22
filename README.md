@@ -42,6 +42,8 @@ python -m agent_council review path/to/artifact.md --tier=1
 
 **Reviewing code instead of prose?** Copy the software-council preset — `cp council.software.yaml.example council.yaml`. It runs on the `copilot_cli` runtime and repurposes two deliberators for engineering review: `voice_identity` → **Code Quality & Conventions** (`prompts/code_quality.md`) and `strategy` → **Architecture & Scope** (`prompts/architecture.md`), backed by editable Python/Flask/pytest corpora in `examples/code_standards.example.md` and `examples/engineering_goals.example.md`. Slot ids are kept for schema compatibility, so no source/test changes are needed.
 
+**Reviewing Go?** Copy the Go preset — `cp council.go.yaml.example council.yaml`. Same two reframed slots, tuned for Go 1.21+: `voice_identity` → **Go Code Quality & Idioms** (`prompts/go_code_quality.md`) and `strategy` → **Go Architecture & Package Design** (`prompts/go_architecture.md`), backed by editable Go corpora in `examples/go_standards.example.md` (rules GQ-1..GQ-30 — errors, concurrency, interfaces, testing) and `examples/go_engineering_goals.example.md`. It reuses the same slot ids as the software preset, so pick one preset at a time (Go **or** Python).
+
 Requires Python ≥3.11 and at least one supported LLM CLI on PATH.
 
 ### MCP server (Claude Desktop, Cursor, Cline, custom agents)
