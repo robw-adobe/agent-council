@@ -26,7 +26,7 @@ claude plugin marketplace add Avyayalaya/agent-council
 claude plugin install agent-council@avyayalaya
 ```
 
-Then in any Claude Code session: `/council-review path/to/artifact.md` or `/council-sweep`.
+Then in any Claude Code session: `/council-review path/to/artifact.md go` or `/council-sweep software` (the trailing word is the required team name — see [Choosing a council team](#choosing-a-council-team)).
 
 ### Python (pip from source)
 
@@ -40,9 +40,21 @@ python -m agent_council review path/to/artifact.md --tier=1
 
 **GitHub Copilot users:** for a one-file setup, copy the ready-to-go Copilot config instead — `cp council.copilot.yaml.example council.yaml`. It has the `copilot_cli` runtime and the validated flags already active, so you only need the `copilot` CLI installed + authenticated.
 
-**Reviewing code instead of prose?** Copy the software-council preset — `cp council.software.yaml.example council.yaml`. It runs on the `copilot_cli` runtime and repurposes two deliberators for engineering review: `voice_identity` → **Code Quality & Conventions** (`prompts/code_quality.md`) and `strategy` → **Architecture & Scope** (`prompts/architecture.md`), backed by editable Python/Flask/pytest corpora in `examples/code_standards.example.md` and `examples/engineering_goals.example.md`. Slot ids are kept for schema compatibility, so no source/test changes are needed.
+**Reviewing code instead of prose?** Use the `software` team. It runs on the `copilot_cli` runtime and repurposes two deliberators for engineering review: `voice_identity` → **Code Quality & Conventions** (`prompts/code_quality.md`) and `strategy` → **Architecture & Scope** (`prompts/architecture.md`), backed by editable Python/Flask/pytest corpora in `examples/code_standards.example.md` and `examples/engineering_goals.example.md`. It runs from `council.software.yaml.example` with zero setup; to customize, `cp council.software.yaml.example council.software.yaml` and edit. Slot ids are kept for schema compatibility, so no source/test changes are needed.
 
-**Reviewing Go?** Copy the Go preset — `cp council.go.yaml.example council.yaml`. Same two reframed slots, tuned for Go 1.21+: `voice_identity` → **Go Code Quality & Idioms** (`prompts/go_code_quality.md`) and `strategy` → **Go Architecture & Package Design** (`prompts/go_architecture.md`), backed by editable Go corpora in `examples/go_standards.example.md` (rules GQ-1..GQ-30 — errors, concurrency, interfaces, testing) and `examples/go_engineering_goals.example.md`. It reuses the same slot ids as the software preset, so pick one preset at a time (Go **or** Python).
+**Reviewing Go?** Use the `go` team. Same two reframed slots, tuned for Go 1.21+: `voice_identity` → **Go Code Quality & Idioms** (`prompts/go_code_quality.md`) and `strategy` → **Go Architecture & Package Design** (`prompts/go_architecture.md`), backed by editable Go corpora in `examples/go_standards.example.md` (rules GQ-1..GQ-30 — errors, concurrency, interfaces, testing) and `examples/go_engineering_goals.example.md`. It runs from `council.go.yaml.example` with zero setup; to customize, `cp council.go.yaml.example council.go.yaml` and edit. It reuses the same slot ids as the software preset, so pick one team per review (Go **or** Python).
+
+### Choosing a council team
+
+The `/council-review` and `/council-sweep` slash commands take a **required team name** that picks the roster. The Skeptic, Evidence, and Adjudicator seats are shared by every team; each team re-casts the other two seats:
+
+| Team name | Aliases | Config (preferred → fallback) |
+|---|---|---|
+| `general` | `default`, `writing` | `council.yaml` → `council.yaml.example` |
+| `software` | `py`, `python`, `code` | `council.software.yaml` → `council.software.yaml.example` |
+| `go` | `golang` | `council.go.yaml` → `council.go.yaml.example` |
+
+Each team prefers its copied/customized `council.<team>.yaml` and falls back to the shipped `council.<team>.yaml.example`, so every team works out of the box. Examples: `/council-review pkg/foo.go go`, `/council-review draft.md general`, `/council-sweep software --since=72h`. Running the CLI directly, pass the resolved file to `--config` (e.g. `--config=council.go.yaml`).
 
 Requires Python ≥3.11 and at least one supported LLM CLI on PATH.
 
@@ -94,7 +106,7 @@ Use cases per surface:
 | Run full automated Council on an artifact with parallel deliberators + 2-round cross-read + JSONL audit | `python -m agent_council review path/to/artifact.md --tier=1` or MCP `council_review` tool |
 | Apply one deliberator role to a doc I am editing right now (the analytics product, Claude, Cursor) | Load the matching Skill |
 | Compose 2 or 3 deliberators ad-hoc for a multi-angle ad-hoc review | Load multiple Skills sequentially, then optionally load `adjudicator-synthesis` |
-| Use slash commands in Claude Code | `/council-review path/to/artifact.md` (Claude Code only) |
+| Use slash commands in Claude Code | `/council-review path/to/artifact.md <team>` (Claude Code only; team ∈ `general`/`software`/`go`) |
 
 ### Skills vs CLI — what you get on each path
 
